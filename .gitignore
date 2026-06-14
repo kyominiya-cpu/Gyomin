@@ -10,6 +10,9 @@
 # Claude Code local settings (per-user)
 .claude/settings.local.json
 
+# Statusline jq binary (per-machine, downloaded locally)
+.claude/jq.exe
+
 # Node / scripts
 node_modules/
 *.log
