@@ -1,0 +1,24 @@
+{
+  "name": "do-better-workspace-v2",
+  "version": "1.0.0",
+  "description": "> AI-powered PKM workspace for non-coders\r > 비개발자를 위한 AI 작업 환경",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rhim80/do-better-workspace-v2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Rhim80/do-better-workspace-v2/issues"
+  },
+  "homepage": "https://github.com/Rhim80/do-better-workspace-v2#readme",
+  "dependencies": {
+    "playwright": "^1.60.0"
+  }
+}
