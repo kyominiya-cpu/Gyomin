@@ -160,7 +160,7 @@ def _rval(buf, o, t):
     if t == 8: return 0, o
     if t == 9: return 1, o
     if t in (1,2,3,4,5,6): return int.from_bytes(raw,'big',signed=True), o+n
-    if t == 7: return (struct.unpack('>d', raw)[0] if n==8 else None), o+n
+    if t == 7: return (struct.unpack('>d', raw)[0] if len(raw)==8 else None), o+n
     if t >= 13: return raw.decode('utf-8','replace'), o+n
     if t >= 12: return raw, o+n
     return None, o+n
