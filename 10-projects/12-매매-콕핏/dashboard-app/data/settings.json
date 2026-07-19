@@ -1,0 +1,7 @@
+{
+  "account": 10000000,
+  "riskPct": 1,
+  "heatCapPct": 6,
+  "buyProximityPct": 1.5,
+  "sellProximityPct": 1.5
+}

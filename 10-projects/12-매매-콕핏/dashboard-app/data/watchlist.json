@@ -1,0 +1,57 @@
+[
+  {
+    "id": "wi_samsung",
+    "ticker": "삼성전자",
+    "tvSymbol": "KRX:005930",
+    "ledger": "position",
+    "channel": { "lower": [{ "t": "2026-06-01", "p": 70000 }, { "t": "2026-07-01", "p": 72000 }], "width": 9000 },
+    "currentPrice": 73500,
+    "checklist": { "maAligned": true, "macd": true, "volume": false, "reversalCandle": true },
+    "note": "",
+    "updatedAt": "2026-07-19"
+  },
+  {
+    "id": "wi_hynix",
+    "ticker": "SK하이닉스",
+    "tvSymbol": "KRX:000660",
+    "ledger": "longterm",
+    "channel": { "lower": [{ "t": "2026-05-01", "p": 160000 }, { "t": "2026-06-15", "p": 175000 }], "width": 26000 },
+    "currentPrice": 205000,
+    "checklist": { "maAligned": true, "macd": false, "volume": false, "reversalCandle": false },
+    "note": "",
+    "updatedAt": "2026-07-19"
+  },
+  {
+    "id": "wi_ecopro",
+    "ticker": "에코프로",
+    "tvSymbol": "KRX:086520",
+    "ledger": "day",
+    "channel": { "lower": [{ "t": "2026-06-10", "p": 90000 }, { "t": "2026-07-05", "p": 100000 }], "width": 26000 },
+    "currentPrice": 106500,
+    "checklist": { "maAligned": true, "macd": true, "volume": true, "reversalCandle": false },
+    "note": "",
+    "updatedAt": "2026-07-19"
+  },
+  {
+    "id": "wi_kakao",
+    "ticker": "카카오",
+    "tvSymbol": "KRX:035720",
+    "ledger": "position",
+    "channel": { "lower": [{ "t": "2026-06-01", "p": 38000 }, { "t": "2026-07-01", "p": 40000 }], "width": 6000 },
+    "currentPrice": 40800,
+    "checklist": { "maAligned": false, "macd": false, "volume": false, "reversalCandle": false },
+    "note": "역배열 — 매수 금지 상태",
+    "updatedAt": "2026-07-19"
+  },
+  {
+    "id": "wi_hyundai",
+    "ticker": "현대차",
+    "tvSymbol": "KRX:005380",
+    "ledger": "longterm",
+    "channel": { "lower": [{ "t": "2026-05-15", "p": 230000 }, { "t": "2026-06-30", "p": 245000 }], "width": 30000 },
+    "currentPrice": 278000,
+    "checklist": { "maAligned": true, "macd": true, "volume": true, "reversalCandle": true },
+    "note": "",
+    "updatedAt": "2026-07-19"
+  }
+]

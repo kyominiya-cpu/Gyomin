@@ -1,0 +1,5 @@
+# 대용량 자체완결 HTML(각 6.8MB)은 제외 — 소스인 .dc.html만 버전관리
+Trading-Cockpit-standalone.html
+index.html
+support.js
+.thumbnail

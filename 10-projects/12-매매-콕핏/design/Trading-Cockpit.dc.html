@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<template id="__bundler_thumbnail"><div style="width:100%;height:100%;background:#0b0e14;display:flex;align-items:center;justify-content:center"><div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#22c55e,#0e9f6e);display:flex;align-items:center;justify-content:center;font:700 26px sans-serif;color:#04140c">채</div></div></template>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #0b0e14; }
+  a { color: #4c9ffe; text-decoration: none; }
+  a:hover { color: #7cb8ff; }
+  ::-webkit-scrollbar { width: 9px; height: 9px; }
+  ::-webkit-scrollbar-thumb { background: #2b3346; border-radius: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  input, select, button { font-family: 'IBM Plex Sans KR', sans-serif; }
+  input:focus, select:focus { outline: none; border-color: #4c9ffe !important; }
+</style>
+</helmet>
+<div style="height:100vh;display:flex;flex-direction:column;background:#0b0e14;color:#d1d4dc;font-family:'IBM Plex Sans KR',sans-serif;overflow:hidden">
+
+  <!-- TOP BAR -->
+  <div style="height:46px;flex:0 0 46px;display:flex;align-items:center;gap:12px;padding:0 14px;background:#0b0e14;border-bottom:1px solid #202636">
+    <div style="width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,#22c55e,#0e9f6e);display:flex;align-items:center;justify-content:center;font-weight:700;color:#04140c;font-size:13px">채</div>
+    <div style="display:flex;align-items:center;gap:8px;flex:0 0 380px;height:30px;background:#141926;border:1px solid #232a3a;border-radius:7px;padding:0 10px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5b6472" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <span style="color:#5b6472;font-size:12.5px">종목·티커·기능 검색</span>
+      <span style="margin-left:auto;color:#3f4757;border:1px solid #2b3346;border-radius:4px;padding:1px 6px;font-size:11px">/</span>
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+      <div style="display:flex;align-items:center;gap:6px;background:#111a12;border:1px solid #1f3a26;border-radius:6px;padding:4px 9px">
+        <span style="width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e"></span>
+        <span style="font-size:11.5px;color:#7fdca0;font-weight:600">장중</span>
+      </div>
+      <span style="font:500 12px 'IBM Plex Mono',monospace;color:#8b93a3">2026-07-19</span>
+      <span style="font:600 12px 'IBM Plex Mono',monospace;color:#e6e9ef;min-width:58px;text-align:right">{{ clock }}</span>
+      <div style="width:28px;height:28px;border-radius:50%;background:#232a3a;display:flex;align-items:center;justify-content:center;margin-left:4px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b93a3" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;min-height:0">
+    <!-- SIDEBAR RAIL -->
+    <div style="width:50px;flex:0 0 50px;background:#0b0e14;border-right:1px solid #202636;display:flex;flex-direction:column;align-items:center;padding-top:10px;gap:4px">
+      <sc-for list="{{ rail }}" as="r" hint-placeholder-count="6">
+        <div title="{{ r.label }}" style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:{{ r.color }};background:{{ r.bg }};position:relative" style-hover="background:#1a2130;color:#e6e9ef">
+          <div style="width:20px;height:20px" dangerouslySetInnerHTML="{{ r.icon }}"></div>
+          <sc-if value="{{ r.active }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;left:-9px;top:8px;width:3px;height:20px;border-radius:3px;background:#4c9ffe"></span></sc-if>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- CONTENT GRID -->
+    <div style="flex:1;min-width:0;overflow:auto;padding:10px;display:grid;grid-template-columns:288px minmax(560px,1fr) 372px;gap:10px;align-content:start;background:#0b0e14;min-width:1420px">
+
+      <!-- ============ COLUMN A ============ -->
+      <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+
+        <!-- 국내 지수 -->
+        <div style="background:#131722;border:1px solid #232a3a;border-radius:6px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #232a3a">
+            <span style="font:600 12.5px 'IBM Plex Sans KR';color:#e6e9ef">국내 지수</span>
+            <span style="font-size:10px;color:#5b6472;letter-spacing:.5px">KRX · 실시간</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 78px 62px 44px;padding:5px 12px;border-bottom:1px solid #1c2230;font:600 10px 'IBM Plex Sans KR';color:#5b6472;text-transform:uppercase;letter-spacing:.4px">
+            <span>지수</span><span style="text-align:right">현재</span><span style="text-align:right">대비</span><span style="text-align:right">%</span>
+          </div>
+          <sc-for list="{{ domesticIdx }}" as="q" hint-placeholder-count="4">
+            <div style="display:grid;grid-template-columns:1fr 78px 62px 44px;padding:6px 12px;align-items:center;border-bottom:1px solid #171d29" style-hover="background:#171d2b">
+              <span style="font-size:12px;color:#c7ccd6">{{ q.name }}</span>
+              <span style="font:500 12px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:#e6e9ef">{{ q.price }}</span>
+              <span style="font:500 11.5px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:{{ q.color }}">{{ q.chg }}</span>
+              <span style="font:500 11.5px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:{{ q.color }}">{{ q.pct }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- 미국 지수 -->
+        <div style="background:#131722;border:1px solid #232a3a;border-radius:6px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #232a3a">
+            <span style="font:600 12.5px 'IBM Plex Sans KR';color:#e6e9ef">미국 지수 · 선물</span>
+            <span style="font-size:10px;color:#5b6472;letter-spacing:.5px">15분 지연</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 82px 60px 44px;padding:5px 12px;border-bottom:1px solid #1c2230;font:600 10px 'IBM Plex Sans KR';color:#5b6472;text-transform:uppercase;letter-spacing:.4px">
+            <span>지수</span><span style="text-align:right">현재</span><span style="text-align:right">대비</span><span style="text-align:right">%</span>
+          </div>
+          <sc-for list="{{ usIdx }}" as="q" hint-placeholder-count="5">
+            <div style="display:grid;grid-template-columns:1fr 82px 60px 44px;padding:6px 12px;align-items:center;border-bottom:1px solid #171d29" style-hover="background:#171d2b">
+              <span style="font-size:12px;color:#c7ccd6">{{ q.name }}</span>
+              <span style="font:500 12px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:#e6e9ef">{{ q.price }}</span>
+              <span style="font:500 11.5px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:{{ q.color }}">{{ q.chg }}</span>
+              <span style="font:500 11.5px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:{{ q.color }}">{{ q.pct }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- 시장 뉴스 -->
+        <div style="background:#131722;border:1px solid #232a3a;border-radius:6px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #232a3a">
+            <span style="font:600 12.5px 'IBM Plex Sans KR';color:#e6e9ef">시장 뉴스</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5b6472" stroke-width="2"><path d="M7 17L17 7M17 7H9M17 7v8"/></svg>
+          </div>
+          <sc-for list="{{ news }}" as="n" hint-placeholder-count="4">
+            <div style="padding:8px 12px;border-bottom:1px solid #171d29;cursor:pointer" style-hover="background:#171d2b">
+              <div style="font-size:12px;color:#c7ccd6;line-height:1.35;text-wrap:pretty">{{ n.title }}</div>
+              <div style="display:flex;gap:8px;margin-top:4px;font-size:10.5px;color:#5b6472"><span>{{ n.src }}</span><span>·</span><span>{{ n.time }}</span></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- ============ COLUMN B (핵심) ============ -->
+      <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+
+        <!-- 채널 사냥 리스트 -->
+        <div style="background:#131722;border:1px solid #2a3550;border-radius:6px;overflow:hidden;box-shadow:0 0 0 1px rgba(76,159,254,.08)">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid #232a3a;background:linear-gradient(90deg,rgba(76,159,254,.06),transparent)">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="width:3px;height:15px;border-radius:2px;background:#4c9ffe"></span>
+              <span style="font:700 13.5px 'IBM Plex Sans KR';color:#f0f2f6">채널 사냥 리스트</span>
+              <span style="font-size:10px;color:#4c9ffe;border:1px solid #2a4a78;background:#122236;border-radius:4px;padding:1px 6px;font-weight:600">핵심 ★</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:11px;color:#7fdca0">매수존 {{ buyCount }}</span>
+              <span style="font-size:11px;color:#f2b45a">분할매도 {{ sellCount }}</span>
+              <span style="font-size:11px;color:#f0616d">이탈 {{ breakCount }}</span>
+              <span style="font-size:10px;color:#5b6472;border-left:1px solid #2b3346;padding-left:10px">근접임계 {{ proxLabel }}</span>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <div style="min-width:960px">
+              <div style="display:grid;grid-template-columns:26px 158px 138px 92px 96px 92px 74px 74px 96px 118px;padding:7px 12px;border-bottom:1px solid #232a3a;font:600 10px 'IBM Plex Sans KR';color:#5b6472;text-transform:uppercase;letter-spacing:.4px">
+                <span></span><span>종목 · 장부</span><span style="text-align:center">채널</span><span style="text-align:right">오늘 하단</span><span style="text-align:right">현재가</span><span style="text-align:right">오늘 상단</span><span style="text-align:right">→하단</span><span style="text-align:right">→상단</span><span style="text-align:center">플레이북</span><span style="text-align:right">상태</span>
+              </div>
+              <sc-for list="{{ items }}" as="it" hint-placeholder-count="6">
+                <div style="display:grid;grid-template-columns:26px 158px 138px 92px 96px 92px 74px 74px 96px 118px;padding:8px 12px;align-items:center;border-bottom:1px solid #171d29;background:{{ it.rowBg }}" style-hover="background:#181f2e">
+                  <span style="width:14px;height:14px;border-radius:3px;border:1.5px solid {{ it.dotColor }};background:{{ it.chkBg }}"></span>
+                  <div style="min-width:0">
+                    <div style="font:600 13px 'IBM Plex Sans KR';color:#eceff4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ it.name }}</div>
+                    <div style="display:flex;gap:5px;align-items:center;margin-top:2px">
+                      <span style="font-size:9.5px;color:#8b93a3;background:#1c2434;border-radius:3px;padding:1px 5px">{{ it.book }}</span>
+                      <span style="font-size:10px;color:#5b6472;font-family:'IBM Plex Mono'">{{ it.ticker }}</span>
+                    </div>
+                  </div>
+                  <div style="display:flex;justify-content:center">
+                    <svg width="130" height="46" viewBox="0 0 130 46" style="display:block">
+                      <path d="{{ it.c.upperPath }}" fill="none" stroke="#4a3a1a" stroke-width="1" stroke-dasharray="3 2"/>
+                      <path d="{{ it.c.lowerPath }}" fill="none" stroke="#1e4030" stroke-width="1" stroke-dasharray="3 2"/>
+                      <path d="{{ it.c.bandPath }}" fill="{{ it.c.bandFill }}" stroke="none"/>
+                      <path d="{{ it.c.pricePath }}" fill="none" stroke="{{ it.c.priceColor }}" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>
+                      <circle cx="{{ it.c.dotX }}" cy="{{ it.c.dotY }}" r="2.6" fill="{{ it.c.dotColor }}"/>
+                      <circle cx="{{ it.c.dotX }}" cy="{{ it.c.dotY }}" r="5" fill="none" stroke="{{ it.c.dotColor }}" stroke-width="1" opacity="0.4"/>
+                    </svg>
+                  </div>
+                  <span style="font:500 12.5px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:#22c55e">{{ it.lowerStr }}</span>
+                  <span style="font:600 13px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:#f0f2f6">{{ it.priceStr }}</span>
+                  <span style="font:500 12.5px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:#f59e0b">{{ it.upperStr }}</span>
+                  <span style="font:500 12px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:{{ it.lowerPctColor }}">{{ it.distLowerStr }}</span>
+                  <span style="font:500 12px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:{{ it.upperPctColor }}">{{ it.distUpperStr }}</span>
+                  <div style="display:flex;gap:3px;justify-content:center">
+                    <sc-for list="{{ it.gates }}" as="g" hint-placeholder-count="4">
+                      <span onClick="{{ g.toggle }}" title="{{ g.title }}" style="width:19px;height:19px;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:600 9.5px 'IBM Plex Sans KR';border:1px solid {{ g.border }};background:{{ g.bg }};color:{{ g.fg }}">{{ g.label }}</span>
+                    </sc-for>
+                  </div>
+                  <div style="display:flex;justify-content:flex-end">
+                    <span style="font:600 11px 'IBM Plex Sans KR';padding:3px 8px;border-radius:5px;white-space:nowrap;color:{{ it.statusFg }};background:{{ it.statusBg }};border:1px solid {{ it.statusBorder }}">{{ it.statusLabel }}</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="padding:7px 12px;display:flex;gap:14px;align-items:center;background:#0f1420;font-size:10.5px;color:#5b6472">
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:16px;height:0;border-top:1.5px dashed #1e4030"></span>채널 하단(지지)</span>
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:16px;height:0;border-top:1.5px dashed #4a3a1a"></span>채널 상단(분할매도)</span>
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:16px;height:2px;background:#8b93a3"></span>가격 경로</span>
+            <span style="margin-left:auto">플레이북 게이트: 정=정배열 · M=MACD · 거=거래량 · 캔=반등캔들 (클릭 토글)</span>
+          </div>
+        </div>
+
+        <!-- 매매 장부 -->
+        <div style="background:#131722;border:1px solid #232a3a;border-radius:6px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid #232a3a">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font:600 12.5px 'IBM Plex Sans KR';color:#e6e9ef">매매 장부</span>
+              <span style="font-size:10px;color:#5b6472">데이 · 포지션 · 중장기</span>
+            </div>
+            <div style="display:flex;gap:16px;align-items:center">
+              <div style="text-align:right"><div style="font-size:9.5px;color:#5b6472">승률</div><div style="font:600 12.5px 'IBM Plex Mono';color:#e6e9ef">{{ summary.winRate }}</div></div>
+              <div style="text-align:right"><div style="font-size:9.5px;color:#5b6472">기대값</div><div style="font:600 12.5px 'IBM Plex Mono';color:#22c55e">{{ summary.expR }}</div></div>
+              <div style="text-align:right"><div style="font-size:9.5px;color:#5b6472">포트폴리오 히트</div><div style="font:600 12.5px 'IBM Plex Mono';color:{{ summary.heatColor }}">{{ summary.heat }}</div></div>
+            </div>
+          </div>
+          <div style="padding:7px 12px 3px;font-size:10px;color:#5b6472;text-transform:uppercase;letter-spacing:.4px;font-weight:600">열린 포지션</div>
+          <div style="display:grid;grid-template-columns:1fr 70px 70px 56px 90px 60px;padding:4px 12px;font:600 10px 'IBM Plex Sans KR';color:#5b6472;text-transform:uppercase;letter-spacing:.3px">
+            <span>종목·장부</span><span style="text-align:right">진입</span><span style="text-align:right">손절</span><span style="text-align:right">수량</span><span style="text-align:right">평가손익</span><span style="text-align:right">R</span>
+          </div>
+          <sc-for list="{{ openPos }}" as="p" hint-placeholder-count="2">
+            <div style="display:grid;grid-template-columns:1fr 70px 70px 56px 90px 60px;padding:6px 12px;align-items:center;border-top:1px solid #171d29" style-hover="background:#171d2b">
+              <div style="display:flex;align-items:center;gap:6px"><span style="font-size:12px;color:#eceff4;font-weight:500">{{ p.name }}</span><span style="font-size:9px;color:#8b93a3;background:#1c2434;border-radius:3px;padding:1px 5px">{{ p.book }}</span></div>
+              <span style="font:500 12px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:#c7ccd6">{{ p.entry }}</span>
+              <span style="font:500 12px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:#c7ccd6">{{ p.stop }}</span>
+              <span style="font:500 12px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:#c7ccd6">{{ p.qty }}</span>
+              <span style="font:600 12px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:{{ p.color }}">{{ p.pnl }}</span>
+              <span style="font:600 12px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:{{ p.color }}">{{ p.r }}</span>
+            </div>
+          </sc-for>
+          <div style="padding:9px 12px 3px;font-size:10px;color:#5b6472;text-transform:uppercase;letter-spacing:.4px;font-weight:600;border-top:1px solid #1c2230">청산 기록</div>
+          <div style="display:grid;grid-template-columns:1fr 70px 70px 56px 90px 60px;padding:4px 12px;font:600 10px 'IBM Plex Sans KR';color:#5b6472;text-transform:uppercase;letter-spacing:.3px">
+            <span>종목·장부</span><span style="text-align:right">진입</span><span style="text-align:right">청산</span><span style="text-align:right">수량</span><span style="text-align:right">실현손익</span><span style="text-align:right">R</span>
+          </div>
+          <sc-for list="{{ closedPos }}" as="p" hint-placeholder-count="2">
+            <div style="display:grid;grid-template-columns:1fr 70px 70px 56px 90px 60px;padding:6px 12px;align-items:center;border-top:1px solid #171d29" style-hover="background:#171d2b">
+              <div style="display:flex;align-items:center;gap:6px"><span style="font-size:12px;color:#c7ccd6;font-weight:500">{{ p.name }}</span><span style="font-size:9px;color:#8b93a3;background:#1c2434;border-radius:3px;padding:1px 5px">{{ p.book }}</span></div>
+              <span style="font:500 12px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:#8b93a3">{{ p.entry }}</span>
+              <span style="font:500 12px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:#8b93a3">{{ p.exit }}</span>
+              <span style="font:500 12px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:#8b93a3">{{ p.qty }}</span>
+              <span style="font:600 12px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:{{ p.color }}">{{ p.pnl }}</span>
+              <span style="font:600 12px 'IBM Plex Mono';font-variant-numeric:tabular-nums;text-align:right;color:{{ p.color }}">{{ p.r }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- ============ COLUMN C ============ -->
+      <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+
+        <!-- 포지션 사이징 계산기 -->
+        <div style="background:#131722;border:1px solid #232a3a;border-radius:6px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid #232a3a">
+            <span style="font:600 12.5px 'IBM Plex Sans KR';color:#e6e9ef">포지션 사이징 계산기</span>
+            <span style="font-size:10px;color:#5b6472">{{ calc.riskLabel }} 룰</span>
+          </div>
+          <div style="padding:12px">
+            <div style="display:flex;gap:8px;margin-bottom:10px">
+              <div style="flex:1">
+                <label style="font-size:10px;color:#5b6472;display:block;margin-bottom:4px">종목</label>
+                <select value="{{ calc.symbol }}" onChange="{{ onSymbol }}" style="width:100%;height:32px;background:#0f1420;border:1px solid #2b3346;border-radius:6px;color:#e6e9ef;font-size:12.5px;padding:0 8px">
+                  <sc-for list="{{ symbolOpts }}" as="s" hint-placeholder-count="6">
+                    <option value="{{ s.tk }}">{{ s.label }}</option>
+                  </sc-for>
+                </select>
+              </div>
+              <div style="flex:0 0 96px">
+                <label style="font-size:10px;color:#5b6472;display:block;margin-bottom:4px">장부</label>
+                <div style="height:32px;background:#0f1420;border:1px solid #2b3346;border-radius:6px;display:flex;align-items:center;padding:0 10px;font-size:12px;color:#c7ccd6">{{ calc.book }}</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+              <div>
+                <label style="font-size:10px;color:#5b6472;display:block;margin-bottom:4px">진입가</label>
+                <input inputmode="decimal" value="{{ calc.entry }}" onInput="{{ onEntry }}" style="width:100%;height:32px;background:#0f1420;border:1px solid #2b3346;border-radius:6px;color:#e6e9ef;font:500 12.5px 'IBM Plex Mono';text-align:right;padding:0 8px"/>
+              </div>
+              <div>
+                <label style="font-size:10px;color:#22c55e;display:block;margin-bottom:4px">손절가 (하단)</label>
+                <input inputmode="decimal" value="{{ calc.stop }}" onInput="{{ onStop }}" style="width:100%;height:32px;background:#0f1420;border:1px solid #223a2b;border-radius:6px;color:#7fdca0;font:500 12.5px 'IBM Plex Mono';text-align:right;padding:0 8px"/>
+              </div>
+              <div>
+                <label style="font-size:10px;color:#f59e0b;display:block;margin-bottom:4px">목표가 (상단)</label>
+                <input inputmode="decimal" value="{{ calc.target }}" onInput="{{ onTarget }}" style="width:100%;height:32px;background:#0f1420;border:1px solid #3a3018;border-radius:6px;color:#f2b45a;font:500 12.5px 'IBM Plex Mono';text-align:right;padding:0 8px"/>
+              </div>
+            </div>
+
+            <div style="background:#0f1420;border:1px solid #232a3a;border-radius:8px;padding:12px;margin-bottom:10px">
+              <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:12px">
+                <div>
+                  <div style="font-size:10.5px;color:#5b6472;margin-bottom:2px">매수 수량</div>
+                  <div style="font:700 30px 'IBM Plex Mono';color:#4c9ffe;line-height:1;font-variant-numeric:tabular-nums">{{ calc.qty }}<span style="font-size:14px;color:#5b6472;margin-left:3px">주</span></div>
+                </div>
+                <div style="text-align:right">
+                  <div style="font-size:10.5px;color:#5b6472;margin-bottom:2px">총 매수금액</div>
+                  <div style="font:600 17px 'IBM Plex Mono';color:#e6e9ef;font-variant-numeric:tabular-nums">{{ calc.total }}</div>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div style="background:#131a12;border:1px solid #1f3a26;border-radius:6px;padding:8px 10px">
+                  <div style="font-size:10px;color:#5b6472">1R · 주당 리스크</div>
+                  <div style="font:600 13.5px 'IBM Plex Mono';color:#7fdca0;font-variant-numeric:tabular-nums">{{ calc.oneR }}</div>
+                </div>
+                <div style="background:#1a1710;border:1px solid #3a3018;border-radius:6px;padding:8px 10px">
+                  <div style="font-size:10px;color:#5b6472">목표 R배수</div>
+                  <div style="font:600 13.5px 'IBM Plex Mono';color:#f2b45a;font-variant-numeric:tabular-nums">{{ calc.targetR }}</div>
+                </div>
+                <div style="background:#0f1420;border:1px solid #232a3a;border-radius:6px;padding:8px 10px">
+                  <div style="font-size:10px;color:#5b6472">트레이드 리스크</div>
+                  <div style="font:600 13.5px 'IBM Plex Mono';color:#e6e9ef;font-variant-numeric:tabular-nums">{{ calc.tradeRisk }}</div>
+                </div>
+                <div style="background:{{ calc.heatBg }};border:1px solid {{ calc.heatBorder }};border-radius:6px;padding:8px 10px">
+                  <div style="font-size:10px;color:#5b6472">반영 후 히트</div>
+                  <div style="font:600 13.5px 'IBM Plex Mono';color:{{ calc.heatColor }};font-variant-numeric:tabular-nums">{{ calc.newHeat }}</div>
+                </div>
+              </div>
+              <sc-if value="{{ calc.warn }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:10px;background:#2a1416;border:1px solid #5a2328;border-radius:6px;padding:7px 10px;display:flex;align-items:center;gap:7px">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f0616d" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9L2 18a2 2 0 001.7 3h16.6a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
+                  <span style="font-size:11.5px;color:#f2a0a6">{{ calc.warnMsg }}</span>
+                </div>
+              </sc-if>
+            </div>
+            <button onClick="{{ onLogTrade }}" style="width:100%;height:36px;background:#1a3a26;border:1px solid #2a6b45;border-radius:7px;color:#7fdca0;font:600 13px 'IBM Plex Sans KR';cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px" style-hover="background:#22503a;color:#a7ecc0">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+              장부에 진입 기록
+            </button>
+          </div>
+        </div>
+
+        <!-- 알림 패널 -->
+        <div style="background:#131722;border:1px solid #232a3a;border-radius:6px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid #232a3a">
+            <div style="display:flex;align-items:center;gap:7px">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f2b45a" stroke-width="2"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg>
+              <span style="font:600 12.5px 'IBM Plex Sans KR';color:#e6e9ef">알림 · 웹훅 수신</span>
+            </div>
+            <span style="font-size:10px;color:#5b6472">15초 폴링</span>
+          </div>
+          <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid #171d29">
+              <span style="width:8px;height:8px;border-radius:50%;background:{{ a.dot }};flex:0 0 8px;box-shadow:0 0 6px {{ a.dot }}"></span>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12px;color:#e6e9ef;font-weight:500">{{ a.title }}</div>
+                <div style="font-size:10.5px;color:#5b6472;margin-top:2px;display:flex;gap:7px"><span>{{ a.time }}</span><span style="color:{{ a.dot }}">{{ a.tag }}</span></div>
+              </div>
+              <button onClick="{{ a.ack }}" style="flex:0 0 auto;height:26px;padding:0 10px;background:#1c2434;border:1px solid #2b3346;border-radius:6px;color:#8b93a3;font-size:11px;font-weight:600;cursor:pointer" style-hover="background:#232d40;color:#c7ccd6">확인</button>
+            </div>
+          </sc-for>
+          <sc-if value="{{ noAlerts }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:18px 12px;text-align:center;font-size:11.5px;color:#5b6472">모든 알림을 확인했습니다.</div>
+          </sc-if>
+        </div>
+
+        <!-- 설정 요약 -->
+        <div style="background:#131722;border:1px solid #232a3a;border-radius:6px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid #232a3a">
+            <span style="font:600 12.5px 'IBM Plex Sans KR';color:#e6e9ef">리스크 설정</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5b6472" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#1c2230">
+            <div style="background:#131722;padding:10px 12px"><div style="font-size:10px;color:#5b6472">계좌 규모 (₩)</div><div style="font:600 14px 'IBM Plex Mono';color:#e6e9ef;font-variant-numeric:tabular-nums">{{ settings.accountKrw }}</div></div>
+            <div style="background:#131722;padding:10px 12px"><div style="font-size:10px;color:#5b6472">트레이드 리스크</div><div style="font:600 14px 'IBM Plex Mono';color:#e6e9ef">{{ settings.riskPctLabel }}</div></div>
+            <div style="background:#131722;padding:10px 12px"><div style="font-size:10px;color:#5b6472">히트 상한</div><div style="font:600 14px 'IBM Plex Mono';color:#e6e9ef">{{ settings.heatCapLabel }}</div></div>
+            <div style="background:#131722;padding:10px 12px"><div style="font-size:10px;color:#5b6472">근접 임계</div><div style="font:600 14px 'IBM Plex Mono';color:#e6e9ef">{{ settings.proxLabel }}</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    this.RAW = [
+      { tk:'005930', name:'삼성전자', book:'포지션', cur:'₩', dec:0, lowerLeft:68000, lowerToday:71400, width:9800, price:72150, chg:850, seed:0.4 },
+      { tk:'000660', name:'SK하이닉스', book:'중장기', cur:'₩', dec:0, lowerLeft:171000, lowerToday:178000, width:26000, price:190500, chg:-2500, seed:1.6 },
+      { tk:'086520', name:'에코프로', book:'데이', cur:'₩', dec:0, lowerLeft:88000, lowerToday:92000, width:26000, price:115200, chg:3100, seed:2.7 },
+      { tk:'NVDA', name:'NVIDIA', book:'포지션', cur:'$', dec:2, lowerLeft:112, lowerToday:118.5, width:34, price:141.2, chg:-1.85, seed:0.9 },
+      { tk:'AAPL', name:'Apple', book:'중장기', cur:'$', dec:2, lowerLeft:203, lowerToday:208.5, width:38, price:212.9, chg:1.40, seed:3.3 },
+      { tk:'TSLA', name:'Tesla', book:'데이', cur:'$', dec:2, lowerLeft:250, lowerToday:242, width:70, price:235.6, chg:-6.40, seed:2.1 },
+    ];
+    this.state = {
+      clock: this.now(),
+      gates: {
+        '005930':{align:true,macd:true,vol:false,candle:true},
+        '000660':{align:true,macd:false,vol:false,candle:false},
+        '086520':{align:true,macd:true,vol:true,candle:false},
+        'NVDA':{align:false,macd:true,vol:false,candle:false},
+        'AAPL':{align:true,macd:true,vol:true,candle:true},
+        'TSLA':{align:false,macd:false,vol:false,candle:false},
+      },
+      settings:{ account:100000000, accountUsd:75000, riskPct:1.5, heatCap:6, prox:3 },
+      calc:{ symbol:'005930', entry:'72150', stop:'71400', target:'81200' },
+      alerts:[
+        { id:1, title:'삼성전자 · 채널 하단선 도달', time:'2026-07-19 15:42', tag:'매수존', dot:'#22c55e' },
+        { id:2, title:'Tesla · 채널 하단 이탈', time:'2026-07-19 14:08', tag:'손절 경보', dot:'#ef4444' },
+        { id:3, title:'Apple · 하단 근접 3% 이내', time:'2026-07-19 11:20', tag:'매수존', dot:'#22c55e' },
+      ],
+    };
+  }
+  now(){ const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0'); }
+  componentDidMount(){ this._t=setInterval(()=>this.setState({clock:this.now()}),1000); }
+  componentWillUnmount(){ clearInterval(this._t); }
+
+  fmt(n, cur, dec){
+    if(n===null||n===undefined||isNaN(n)) return '—';
+    const s = Number(n).toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+    return cur==='₩' ? '₩'+s : '$'+s;
+  }
+  signed(n, cur, dec){
+    const core = this.fmt(Math.abs(n),cur,dec);
+    return (n>=0?'+':'−')+core;
+  }
+
+  status(it){
+    const upper = it.lowerToday + it.width;
+    const prox = this.state.settings.prox;
+    if(it.price < it.lowerToday){
+      return {key:'break', label:'하단 이탈 · 손절', fg:'#ffb3b8', bg:'#2a1416', border:'#5a2328', dot:'#ef4444'};
+    }
+    const dl = (it.price - it.lowerToday)/it.lowerToday*100;
+    const du = (upper - it.price)/upper*100;
+    if(dl <= prox) return {key:'buy', label:'매수존 근접', fg:'#a7ecc0', bg:'#122016', border:'#1f4a30', dot:'#22c55e'};
+    if(du <= prox) return {key:'sell', label:'분할매도 근접', fg:'#f4c987', bg:'#221a0e', border:'#4a3a1a', dot:'#f59e0b'};
+    return {key:'neutral', label:'중립', fg:'#9aa2b1', bg:'#171d29', border:'#2b3346', dot:'#6b7484'};
+  }
+
+  buildSeries(it){
+    const N=26, pts=[];
+    for(let i=0;i<N;i++){
+      const t=i/(N-1);
+      const lb = it.lowerLeft + (it.lowerToday-it.lowerLeft)*t;
+      let frac = 0.5 + 0.32*Math.sin(i*0.8 + it.seed*3) + 0.12*Math.sin(i*1.9 + it.seed);
+      frac = Math.max(-0.15, Math.min(1.15, frac));
+      pts.push(lb + it.width*frac);
+    }
+    pts[N-1] = it.price; // anchor last point to real price
+    return pts;
+  }
+
+  chart(it){
+    const W=130, H=46, pad=5, N=26;
+    const series = this.buildSeries(it);
+    const lowers=[], uppers=[];
+    for(let i=0;i<N;i++){ const t=i/(N-1); const lb=it.lowerLeft+(it.lowerToday-it.lowerLeft)*t; lowers.push(lb); uppers.push(lb+it.width); }
+    let mn=Infinity, mx=-Infinity;
+    [...series,...lowers,...uppers].forEach(v=>{ if(v<mn)mn=v; if(v>mx)mx=v; });
+    const rng = (mx-mn)||1;
+    const X=i=> pad + (i/(N-1))*(W-2*pad);
+    const Y=v=> H-pad - ((v-mn)/rng)*(H-2*pad);
+    const path=arr=> arr.map((v,i)=>(i?'L':'M')+X(i).toFixed(1)+','+Y(v).toFixed(1)).join(' ');
+    const bandPath = uppers.map((v,i)=>(i?'L':'M')+X(i).toFixed(1)+','+Y(v).toFixed(1)).join(' ')
+      + ' ' + lowers.map((v,i)=>'L'+X(N-1-i).toFixed(1)+','+Y(lowers[N-1-i]).toFixed(1)).join(' ') + ' Z';
+    const st = this.status(it);
+    const bandFill = st.key==='buy'?'rgba(34,197,94,.06)':st.key==='sell'?'rgba(245,158,11,.06)':st.key==='break'?'rgba(239,68,68,.06)':'rgba(139,147,163,.04)';
+    const priceColor = st.key==='break'?'#f0616d':st.key==='buy'?'#cfe8d6':st.key==='sell'?'#e6d0a8':'#aeb6c4';
+    return { upperPath:path(uppers), lowerPath:path(lowers), pricePath:path(series), bandPath, bandFill,
+      priceColor, dotX:X(N-1).toFixed(1), dotY:Y(series[N-1]).toFixed(1), dotColor:st.dot };
+  }
+
+  buildItems(){
+    return this.RAW.map(it=>{
+      const upper = it.lowerToday + it.width;
+      const st = this.status(it);
+      const dl = (it.price - it.lowerToday)/it.lowerToday*100;
+      const du = (upper - it.price)/upper*100;
+      const g = this.state.gates[it.tk]||{};
+      const mkGate=(key,label,title)=>({ label, title, toggle:()=>this.toggleGate(it.tk,key),
+        on:!!g[key],
+        bg:g[key]?'#1a3a26':'#141926', border:g[key]?'#2a6b45':'#2b3346', fg:g[key]?'#7fdca0':'#5b6472' });
+      return {
+        tk:it.tk, name:it.name, book:it.book, ticker:it.tk,
+        lowerStr:this.fmt(it.lowerToday,it.cur,it.dec),
+        priceStr:this.fmt(it.price,it.cur,it.dec),
+        upperStr:this.fmt(upper,it.cur,it.dec),
+        distLowerStr:(it.price<it.lowerToday?'−':'+')+Math.abs(dl).toFixed(1)+'%',
+        distUpperStr:(du<0?'−':'+')+Math.abs(du).toFixed(1)+'%',
+        lowerPctColor: st.key==='break'?'#f0616d': dl<=this.state.settings.prox?'#22c55e':'#8b93a3',
+        upperPctColor: du<=this.state.settings.prox && st.key!=='break'?'#f59e0b':'#8b93a3',
+        statusLabel:st.label, statusFg:st.fg, statusBg:st.bg, statusBorder:st.border, dotColor:st.dot,
+        chkBg: st.key==='buy'?'#22c55e': st.key==='sell'?'#f59e0b': st.key==='break'?'#ef4444':'transparent',
+        rowBg: st.key==='break'?'rgba(239,68,68,.05)': st.key==='buy'?'rgba(34,197,94,.04)':'transparent',
+        c:this.chart(it),
+        gates:[ mkGate('align','정','정배열'), mkGate('macd','M','MACD'), mkGate('vol','거','거래량'), mkGate('candle','캔','반등캔들') ],
+      };
+    });
+  }
+
+  toggleGate(tk,key){ this.setState(s=>{ const g={...s.gates,[tk]:{...s.gates[tk],[key]:!s.gates[tk][key]}}; return {gates:g}; }); }
+
+  itemByTk(tk){ return this.RAW.find(x=>x.tk===tk); }
+  onSymbol=(e)=>{ const tk=e.target.value; const it=this.itemByTk(tk); this.setState(s=>({calc:{symbol:tk, entry:String(it.price), stop:String(it.lowerToday), target:String(it.lowerToday+it.width)}})); };
+  onEntry=(e)=>{ const v=e.target.value; this.setState(s=>({calc:{...s.calc,entry:v}})); };
+  onStop=(e)=>{ const v=e.target.value; this.setState(s=>({calc:{...s.calc,stop:v}})); };
+  onTarget=(e)=>{ const v=e.target.value; this.setState(s=>({calc:{...s.calc,target:v}})); };
+  onLogTrade=()=>{ /* demo: no-op, would push to journal */ };
+  ackAlert(id){ this.setState(s=>({alerts:s.alerts.filter(a=>a.id!==id)})); }
+
+  computeCalc(){
+    const c=this.state.calc; const it=this.itemByTk(c.symbol); const cur=it.cur, dec=it.dec;
+    const openHeat = 3.4; // 기존 열린 포지션 히트%
+    const account = cur==='₩'? this.state.settings.account : this.state.settings.accountUsd;
+    const entry=parseFloat(c.entry), stop=parseFloat(c.stop), target=parseFloat(c.target);
+    const riskPerShare = entry-stop;
+    const valid = !isNaN(entry)&&!isNaN(stop)&&riskPerShare>0;
+    const budget = account*this.state.settings.riskPct/100;
+    const qty = valid? Math.floor(budget/riskPerShare):0;
+    const tradeRisk = qty*riskPerShare;
+    const total = qty*entry;
+    const targetR = (valid&&!isNaN(target))? (target-entry)/riskPerShare : NaN;
+    const thisHeat = account? tradeRisk/account*100:0;
+    const newHeat = openHeat + thisHeat;
+    const warn = newHeat > this.state.settings.heatCap || !valid;
+    const heatColor = newHeat>this.state.settings.heatCap?'#f0616d': newHeat>this.state.settings.heatCap*0.75?'#f2b45a':'#7fdca0';
+    return {
+      symbol:c.symbol, entry:c.entry, stop:c.stop, target:c.target, book:it.book,
+      riskLabel:this.state.settings.riskPct+'%',
+      qty: valid? qty.toLocaleString('en-US'):'0',
+      total: valid? this.fmt(total,cur,dec):'—',
+      oneR: valid? this.fmt(riskPerShare,cur,dec):'—',
+      targetR: (!isNaN(targetR))? targetR.toFixed(2)+'R':'—',
+      tradeRisk: valid? this.fmt(tradeRisk,cur,dec):'—',
+      newHeat: newHeat.toFixed(1)+'%',
+      warn, warnMsg: !valid?'진입가는 손절가보다 높아야 합니다.':'포트폴리오 히트 상한('+this.state.settings.heatCap+'%) 초과 — 수량을 줄이세요.',
+      heatColor, heatBg: newHeat>this.state.settings.heatCap?'#2a1416':'#0f1420', heatBorder:newHeat>this.state.settings.heatCap?'#5a2328':'#232a3a',
+    };
+  }
+
+  renderVals(){
+    const items = this.buildItems();
+    const buyCount = items.filter(i=>i.statusLabel==='매수존 근접').length;
+    const sellCount = items.filter(i=>i.statusLabel==='분할매도 근접').length;
+    const breakCount = items.filter(i=>i.statusLabel.indexOf('이탈')>=0).length;
+    const rail = [
+      {label:'시세 콕핏', active:true, color:'#4c9ffe', bg:'#122236', icon:{__html:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18"/></svg>'}},
+      {label:'채널 사냥', active:false, color:'#8b93a3', bg:'transparent', icon:{__html:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>'}},
+      {label:'사이징', active:false, color:'#8b93a3', bg:'transparent', icon:{__html:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h4"/></svg>'}},
+      {label:'매매 장부', active:false, color:'#8b93a3', bg:'transparent', icon:{__html:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z"/><path d="M9 8h7M9 12h7"/></svg>'}},
+      {label:'알림', active:false, color:'#8b93a3', bg:'transparent', icon:{__html:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg>'}},
+      {label:'설정', active:false, color:'#8b93a3', bg:'transparent', icon:{__html:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>'}},
+    ];
+    const mkIdx = (name,price,chg,pct,up)=>({name,price,chg:(up?'+':'')+chg,pct:(up?'+':'')+pct+'%',color:up?'#22c55e':'#ef4444'});
+    const domesticIdx = [
+      mkIdx('코스피','2,712.14','8.30','0.3',true),
+      mkIdx('코스피200','358.42','1.12','0.3',true),
+      mkIdx('코스닥','848.36','-3.24','-0.4',false),
+      mkIdx('K200 선물','359.10','0.90','0.2',true),
+    ];
+    const usIdx = [
+      mkIdx('S&P 500','5,638.94','-12.40','-0.2',false),
+      mkIdx('나스닥종합','18,342.10','-88.60','-0.5',false),
+      mkIdx('나스닥100 선물','20,115.3','42.10','0.2',true),
+      mkIdx('다우존스','41,240.20','-105.30','-0.3',false),
+      mkIdx('VIX','15.42','0.31','2.1',true),
+    ];
+    const news = [
+      {title:'미국 증시 혼조 마감 — 국채 금리 하락 속 기술주 소폭 약세', src:'MT Newswires', time:'15:32'},
+      {title:'삼성전자, HBM4 공급 협의 진전 보도에 장중 강세', src:'연합인포맥스', time:'14:05'},
+      {title:'엔비디아, 데이터센터 수요 지속 전망에 목표주가 상향', src:'Reuters', time:'11:47'},
+      {title:'코스피, 외국인 순매수 전환 … 반도체 업종 주도', src:'한경', time:'09:58'},
+    ];
+    const openPos = [
+      {name:'삼성전자', book:'포지션', entry:'₩69,800', stop:'₩68,000', qty:'800', pnl:'+₩1,880,000', r:'+1.31R', color:'#22c55e'},
+      {name:'Apple', book:'중장기', entry:'$205.20', stop:'$203.00', qty:'60', pnl:'+$462', r:'+3.50R', color:'#22c55e'},
+    ];
+    const closedPos = [
+      {name:'에코프로', book:'데이', entry:'₩96,000', exit:'₩108,000', qty:'150', pnl:'+₩1,800,000', r:'+2.40R', color:'#22c55e'},
+      {name:'NVIDIA', book:'포지션', entry:'$121.00', exit:'$116.50', qty:'90', pnl:'−$405', r:'−1.00R', color:'#ef4444'},
+    ];
+    const summary = { winRate:'68%', expR:'+0.82R', heat:'3.4% / 6.0%', heatColor:'#7fdca0' };
+    const symbolOpts = this.RAW.map(r=>({tk:r.tk, label:r.name+' · '+r.book}));
+    const s=this.state.settings;
+    return {
+      clock:this.state.clock, rail, domesticIdx, usIdx, news, items, symbolOpts,
+      buyCount, sellCount, breakCount, proxLabel:'±'+s.prox+'%',
+      openPos, closedPos, summary,
+      calc:this.computeCalc(),
+      onSymbol:this.onSymbol, onEntry:this.onEntry, onStop:this.onStop, onTarget:this.onTarget, onLogTrade:this.onLogTrade,
+      alerts:this.state.alerts.map(a=>({...a, ack:()=>this.ackAlert(a.id)})),
+      noAlerts:this.state.alerts.length===0,
+      settings:{ accountKrw:'₩100,000,000', riskPctLabel:s.riskPct+'%', heatCapLabel:s.heatCap+'%', proxLabel:'±'+s.prox+'%' },
+    };
+  }
+}
+</script>
+</body>
+</html>
