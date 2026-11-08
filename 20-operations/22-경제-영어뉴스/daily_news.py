@@ -15,7 +15,7 @@
       python3 daily_news.py cloud-publish FILE.json    → 기사 3개 노션에 올림
       python3 daily_news.py cloud-weekly-prepare       → 일요일이고 주간 정리 없으면 프롬프트 파일 경로 출력
       python3 daily_news.py cloud-weekly-publish FILE.json
-노션 토큰: 환경변수 NOTION_TOKEN 우선, 없으면 .claude/settings.local.json
+노션 토큰: 환경변수 NOTION_TOKEN → .claude/settings.local.json → 없으면 헤더 없이 보냄(클라우드 네트워크 시크릿이 붙여줌)
 """
 import datetime as dt
 import json
@@ -36,8 +36,10 @@ LOGS = HERE / "logs"
 CLAUDE = Path.home() / ".local" / "bin" / "claude.exe"
 INTERVALS = [1, 3, 7, 14, 30]  # 단계별 다음 복습까지 일수
 
-TOKEN = os.environ.get("NOTION_TOKEN") or json.loads(
-    (WS / ".claude" / "settings.local.json").read_text(encoding="utf-8"))["env"]["NOTION_TOKEN"]
+_SETTINGS = WS / ".claude" / "settings.local.json"
+# 클라우드: 네트워크 시크릿 프록시가 api.notion.com 요청에 Authorization 헤더를 붙여줌 → 토큰 없이 실행
+TOKEN = os.environ.get("NOTION_TOKEN") or (
+    json.loads(_SETTINGS.read_text(encoding="utf-8"))["env"]["NOTION_TOKEN"] if _SETTINGS.exists() else "")
 KST = dt.timezone(dt.timedelta(hours=9))  # 클라우드는 UTC라서 한국 날짜로 고정
 TODAY_D = dt.datetime.now(KST).date()
 TODAY = TODAY_D.isoformat()
@@ -75,8 +77,8 @@ def api(method, path, body=None):
     req = urllib.request.Request(
         "https://api.notion.com/v1" + path, method=method,
         data=json.dumps(body).encode() if body is not None else None,
-        headers={"Authorization": f"Bearer {TOKEN}", "Notion-Version": "2022-06-28",
-                 "Content-Type": "application/json"})
+        headers={"Notion-Version": "2022-06-28", "Content-Type": "application/json",
+                 **({"Authorization": f"Bearer {TOKEN}"} if TOKEN else {})})
     try:
         with urllib.request.urlopen(req) as r:
             return json.load(r)
