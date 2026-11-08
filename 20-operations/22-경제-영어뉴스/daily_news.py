@@ -9,9 +9,17 @@
 실행: python -X utf8 daily_news.py           (오늘치, 일요일엔 주간 정리까지)
       python -X utf8 daily_news.py weekly    (주간 정리만)
       python -X utf8 daily_news.py FILE.json (저장된 JSON만 노션에 다시 올리기)
+
+클라우드 루틴(Claude가 직접 기사 조사, claude -p 안 씀) — 상태는 전부 노션에서 읽음:
+      python3 daily_news.py cloud-prepare              → 프롬프트 파일 경로 출력 (오늘치 있으면 SKIP)
+      python3 daily_news.py cloud-publish FILE.json    → 기사 3개 노션에 올림
+      python3 daily_news.py cloud-weekly-prepare       → 일요일이고 주간 정리 없으면 프롬프트 파일 경로 출력
+      python3 daily_news.py cloud-weekly-publish FILE.json
+노션 토큰: 환경변수 NOTION_TOKEN 우선, 없으면 .claude/settings.local.json
 """
 import datetime as dt
 import json
+import os
 import re
 import subprocess
 import sys
@@ -28,16 +36,24 @@ LOGS = HERE / "logs"
 CLAUDE = Path.home() / ".local" / "bin" / "claude.exe"
 INTERVALS = [1, 3, 7, 14, 30]  # 단계별 다음 복습까지 일수
 
-TOKEN = json.loads((WS / ".claude" / "settings.local.json").read_text(encoding="utf-8"))["env"]["NOTION_TOKEN"]
-TODAY_D = dt.date.today()
+TOKEN = os.environ.get("NOTION_TOKEN") or json.loads(
+    (WS / ".claude" / "settings.local.json").read_text(encoding="utf-8"))["env"]["NOTION_TOKEN"]
+KST = dt.timezone(dt.timedelta(hours=9))  # 클라우드는 UTC라서 한국 날짜로 고정
+TODAY_D = dt.datetime.now(KST).date()
 TODAY = TODAY_D.isoformat()
 
 
 def log(msg):
     LOGS.mkdir(exist_ok=True)
     with open(LOGS / "run.log", "a", encoding="utf-8") as f:
-        f.write(f"{dt.datetime.now():%Y-%m-%d %H:%M:%S} {msg}\n")
+        f.write(f"{dt.datetime.now(KST):%Y-%m-%d %H:%M:%S} {msg}\n")
     print(msg)
+
+
+def parse_json(text):
+    """순수 JSON 또는 <<<JSON ... JSON>>> 마커로 감싼 텍스트"""
+    m = re.search(r"<<<JSON\s*(\{.*\})\s*JSON>>>", text, re.S)
+    return json.loads(m.group(1) if m else text)
 
 
 def run_claude(prompt, tag, tools=()):
@@ -304,38 +320,97 @@ def publish(a, known):
     return page["url"], len(repeats)
 
 
-def daily():
+def done_today(kind="기사"):
+    """노션에 오늘치가 이미 있나 — 로컬/클라우드 어디서 돌든 중복 방지"""
+    cond = {"equals": "주간 정리"} if kind == "주간" else {"does_not_equal": "주간 정리"}
+    return bool(api("POST", f"/databases/{DB}/query", {"page_size": 1, "filter": {"and": [
+        {"property": "날짜", "date": {"equals": TODAY}}, {"property": "구분", "select": cond}]}})["results"])
+
+
+def used_urls():
+    """이미 쓴 기사 URL: history.txt(로컬) + 노션 최근 60일"""
+    urls = HISTORY.read_text(encoding="utf-8").split() if HISTORY.exists() else []
+    since = (TODAY_D - dt.timedelta(days=60)).isoformat()
+    for p in query_all(DB, {"filter": {"property": "날짜", "date": {"on_or_after": since}},
+                            "sorts": [{"property": "날짜", "direction": "ascending"}]}):
+        u = p["properties"]["URL"]["url"]
+        if u and u not in urls:
+            urls.append(u)
+    return urls
+
+
+def build_prompt():
     process_reviews()
     known = load_vocab()
-    used = HISTORY.read_text(encoding="utf-8").split() if HISTORY.exists() else []
-    prompt = ((HERE / "prompt.md").read_text(encoding="utf-8")
-              .replace("{TODAY}", TODAY)
-              .replace("{HISTORY}", "\n".join(used[-90:]) or "(none)")
-              .replace("{ISSUES}", "\n".join(f"- {n}" for n in issue_names()) or "(none yet)")
-              .replace("{KNOWN}", ", ".join(sorted(w["base"] for w in known.values())) or "(none yet)"))
-    data = run_claude(prompt, "daily", ("WebSearch", "WebFetch"))
+    return ((HERE / "prompt.md").read_text(encoding="utf-8")
+            .replace("{TODAY}", TODAY)
+            .replace("{HISTORY}", "\n".join(used_urls()[-90:]) or "(none)")
+            .replace("{ISSUES}", "\n".join(f"- {n}" for n in issue_names()) or "(none yet)")
+            .replace("{KNOWN}", ", ".join(sorted(w["base"] for w in known.values())) or "(none yet)"))
+
+
+def daily():
+    data = run_claude(build_prompt(), "daily", ("WebSearch", "WebFetch"))
     (LOGS / f"{TODAY}.json").write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
     return data
 
 
-# ---------- 주간 정리 ----------
-def weekly():
-    start = TODAY_D - dt.timedelta(days=6)
-    arts = []
-    for f in sorted(LOGS.glob("????-??-??.json")):
-        if start.isoformat() <= f.stem <= TODAY:
-            for a in json.loads(f.read_text(encoding="utf-8"))["articles"]:
-                arts.append({"date": f.stem, "category": a.get("category", "경제"), "issue": a.get("issue", ""),
-                             "title": a["title_en"], "summary": a["summary_en"],
-                             "vocab": [f"{v.get('base') or v['word']} ({v['ko']})" for v in a.get("vocab", [])]})
-    if not arts:
-        return log("주간 정리: 이번 주 기사 없음")
-    rng = f"{start:%m/%d}–{TODAY_D:%m/%d}"
-    prompt = ((HERE / "weekly_prompt.md").read_text(encoding="utf-8")
-              .replace("{RANGE}", rng).replace("{ARTICLES}", json.dumps(arts, ensure_ascii=False)))
-    w = run_claude(prompt, "weekly")
-    week_vocab = {re.sub(r"\s*\(.*", "", v): "blue" for a in arts for v in a["vocab"]}
+def publish_all(data, label="OK"):
+    known = load_vocab()
+    for a in data["articles"][:3]:
+        url, rep = publish(a, known)
+        log(f"{label} {a.get('category', '경제')} | {a['source']} | {a['title_en']} -> {url} (다시 나온 단어 {rep})")
 
+
+# ---------- 주간 정리 ----------
+def week_articles(start):
+    """이번 주 기사(노션에서 읽음): 제목·구분·이슈·영어 요약·새 단어"""
+    pages = query_all(DB, {"filter": {"and": [
+        {"property": "날짜", "date": {"on_or_after": start.isoformat()}},
+        {"property": "날짜", "date": {"on_or_before": TODAY}},
+        {"property": "구분", "select": {"does_not_equal": "주간 정리"}}]},
+        "sorts": [{"property": "날짜", "direction": "ascending"}]})
+    vocab = {}
+    for v in query_all(VOCAB_DB, {"filter": {"property": "처음 본 날", "date": {"on_or_after": start.isoformat()}}}):
+        pr = v["properties"]
+        for rel in pr["기사"]["relation"][:1]:  # 처음 나온 기사
+            vocab.setdefault(rel["id"], []).append(f"{plain(pr['단어'])} ({plain(pr['뜻'])})")
+    arts = []
+    for p in pages:
+        pr = p["properties"]
+        summary, inside = [], False
+        for b in api("GET", f"/blocks/{p['id']}/children?page_size=100")["results"]:
+            if b["type"] == "heading_2":
+                if inside:
+                    break
+                inside = plain(b["heading_2"]) == "Summary"
+            elif inside and b["type"] == "paragraph":
+                summary.append(plain(b["paragraph"]))
+            elif inside:
+                break
+        arts.append({"date": (pr["날짜"]["date"] or {}).get("start", ""),
+                     "category": (pr["구분"]["select"] or {}).get("name", "경제"),
+                     "issue": (pr["이슈"]["select"] or {}).get("name", ""),
+                     "title": plain(pr["제목"]), "summary": summary,
+                     "vocab": vocab.get(p["id"].replace("-", ""), vocab.get(p["id"], []))})
+    return arts
+
+
+def weekly_prompt():
+    start = TODAY_D - dt.timedelta(days=6)
+    arts = week_articles(start)
+    if not arts:
+        return None
+    rng = f"{start:%m/%d}–{TODAY_D:%m/%d}"
+    return ((HERE / "weekly_prompt.md").read_text(encoding="utf-8")
+            .replace("{RANGE}", rng).replace("{ARTICLES}", json.dumps(arts, ensure_ascii=False)))
+
+
+def weekly_publish(w):
+    start = TODAY_D - dt.timedelta(days=6)
+    rng = f"{start:%m/%d}–{TODAY_D:%m/%d}"
+    arts = week_articles(start)
+    week_vocab = {re.sub(r"\s*\(.*", "", v): "blue" for a in arts for v in a["vocab"]}
     blocks = [
         {"type": "callout", "callout": {"icon": {"type": "emoji", "emoji": "🗓️"}, "rich_text": [
             txt(f"{rng} 한 주 정리 · 기사 {len(arts)}개\n", bold=True),
@@ -362,18 +437,49 @@ def weekly():
     log(f"OK 주간 정리 -> {page['url']}")
 
 
+def weekly():
+    if done_today("주간"):
+        return log("주간 정리 이미 있음 — 건너뜀")
+    prompt = weekly_prompt()
+    if not prompt:
+        return log("주간 정리: 이번 주 기사 없음")
+    weekly_publish(run_claude(prompt, "weekly"))
+
+
+def write_prompt(name, text):
+    LOGS.mkdir(exist_ok=True)
+    f = LOGS / name
+    f.write_text(text, encoding="utf-8")
+    print(f"PROMPT {f}")
+
+
 if __name__ == "__main__":
     LOGS.mkdir(exist_ok=True)
     arg = sys.argv[1] if len(sys.argv) > 1 else ""
     if arg == "weekly":
         weekly()
-        sys.exit()
-    if not arg and (LOGS / f"{TODAY}.json").exists():
-        sys.exit(log("오늘치 이미 생성됨 — 건너뜀"))
-    data = json.loads(Path(arg).read_text(encoding="utf-8")) if arg else daily()
-    known = load_vocab()
-    for a in data["articles"][:3]:
-        url, rep = publish(a, known)
-        log(f"OK {a.get('category', '경제')} | {a['source']} | {a['title_en']} -> {url} (다시 나온 단어 {rep})")
-    if not arg and TODAY_D.weekday() == 6:
-        weekly()
+    elif arg == "cloud-prepare":
+        if done_today():
+            print("SKIP 오늘치 이미 노션에 있음")
+        else:
+            write_prompt(f"{TODAY}.cloud_prompt.md", build_prompt())
+    elif arg == "cloud-publish":
+        data = parse_json(Path(sys.argv[2]).read_text(encoding="utf-8"))
+        if done_today():
+            sys.exit(log("[cloud] 오늘치 이미 노션에 있음 — 올리지 않음"))
+        publish_all(data, "OK[cloud]")
+    elif arg == "cloud-weekly-prepare":
+        prompt = None if TODAY_D.weekday() != 6 or done_today("주간") else weekly_prompt()
+        print("SKIP 주간 정리 필요 없음") if not prompt else write_prompt(f"{TODAY}.cloud_weekly_prompt.md", prompt)
+    elif arg == "cloud-weekly-publish":
+        if done_today("주간"):
+            sys.exit(log("[cloud] 주간 정리 이미 있음"))
+        weekly_publish(parse_json(Path(sys.argv[2]).read_text(encoding="utf-8")))
+    elif arg:
+        publish_all(json.loads(Path(arg).read_text(encoding="utf-8")))
+    else:
+        if (LOGS / f"{TODAY}.json").exists() or done_today():
+            sys.exit(log("오늘치 이미 생성됨 — 건너뜀"))
+        publish_all(daily())
+        if TODAY_D.weekday() == 6:
+            weekly()
